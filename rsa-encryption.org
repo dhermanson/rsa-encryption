@@ -1,0 +1,39 @@
+#+TITLE: RSA Keypair Generation and sample encryption/decryption
+
+* cleanup
+#+begin_src sh
+rm rsa_key*
+rm example.txt*
+#+end_src
+
+
+* generate key
+#+begin_src sh
+  ssh-keygen -t rsa -b 4096 -N "" -f rsa_key -m PEM -C ""
+#+end_src
+
+* extract the public key
+#+begin_src sh
+  ssh-keygen -e -f ./rsa_key.pub  -m PKCS8 > rsa_key.pub.pem
+#+end_src
+
+* write sample file
+#+begin_src sh
+echo "hello world" > example.txt
+#+end_src
+
+* encrypt a file with the public key
+#+begin_src sh
+openssl pkeyutl -encrypt -pubin -inkey ./rsa_key.pub.pem -in ./example.txt -out ./example.txt.encrypted
+#+end_src
+
+
+* decrypt a file with the private key
+#+begin_src sh
+openssl pkeyutl -decrypt -inkey ./rsa_key -in ./example.txt.encrypted -out ./example.txt.roundtrip
+#+end_src
+
+* cat roundtrip file
+#+begin_src sh
+cat ./example.txt.roundtrip
+#+end_src
