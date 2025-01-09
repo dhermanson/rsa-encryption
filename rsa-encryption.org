@@ -1,39 +1,63 @@
 #+TITLE: RSA Keypair Generation and sample encryption/decryption
 
-* cleanup
-#+begin_src sh
-rm rsa_key*
-rm example.txt*
-#+end_src
-
 
 * generate key
-#+begin_src sh
+The following command generates a key using parameters (in order of occurrence):
+- -t RSA key type
+- -b 4096 as the number of bits
+- -N an empty passphrase
+- -f output the file to rsa_key for private key and rsa_key.pub for public key
+- -m output the private key in PEM format
+- -C do specify an empty comment to omit the email address on the public key
+
+#+begin_src sh :exports code
   ssh-keygen -t rsa -b 4096 -N "" -f rsa_key -m PEM -C ""
 #+end_src
 
 * extract the public key
-#+begin_src sh
+Reformat the public to in PKCS8 format
+
+#+begin_src sh :exports code 
   ssh-keygen -e -f ./rsa_key.pub  -m PKCS8 > rsa_key.pub.pem
 #+end_src
 
+#+RESULTS:
+
 * write sample file
-#+begin_src sh
+Write out a sample file with the contents of "hello world".
+
+#+begin_src sh :exports code 
 echo "hello world" > example.txt
 #+end_src
 
+#+RESULTS:
+
 * encrypt a file with the public key
-#+begin_src sh
-openssl pkeyutl -encrypt -pubin -inkey ./rsa_key.pub.pem -in ./example.txt -out ./example.txt.encrypted
+
+Encrypt the sample file using our public key and write it to ./example.txt.encrypted.
+
+#+begin_src sh :exports code 
+  openssl pkeyutl -encrypt -pubin -inkey ./rsa_key.pub.pem -in ./example.txt -out ./example.txt.encrypted
 #+end_src
 
+#+RESULTS:
 
 * decrypt a file with the private key
-#+begin_src sh
+
+Decrypt the encrypted file above and store it in a file called ./example.txt.roundtrip.
+
+#+begin_src sh :exports code 
 openssl pkeyutl -decrypt -inkey ./rsa_key -in ./example.txt.encrypted -out ./example.txt.roundtrip
 #+end_src
 
-* cat roundtrip file
-#+begin_src sh
+#+RESULTS:
+
+* print out roundtrip file
+Demonstrate that the output of the roundtrip file contains the string "hello world".
+
+#+begin_src sh :exports both 
 cat ./example.txt.roundtrip
 #+end_src
+
+#+RESULTS:
+: hello world
